@@ -14,10 +14,12 @@ class MainActivity : AppCompatActivity() {
     private var socketClient: SocketClient? = null
 
     private val characters = listOf(
-        Character("Omen", R.drawable.omen, CharacterPosition(100, 200)),
-        Character("Jett", R.drawable.jett, CharacterPosition(200, 200)),
-        Character("Raze", R.drawable.raze, CharacterPosition(300, 200))
+        Character("Jett", R.drawable.jett, CharacterPosition(522, 390)),    // Sol karakter
+        Character("Raze", R.drawable.raze, CharacterPosition(862, 399)),    // Orta karakter
+        Character("Omen", R.drawable.omen, CharacterPosition(1151, 338))    // Sağ karakter
     )
+
+    private val lockButtonPosition = CharacterPosition(832, 737)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +46,13 @@ class MainActivity : AppCompatActivity() {
         characterGrid.setOnItemClickListener { _, _, position, _ ->
             socketClient?.let { client ->
                 val character = characters[position]
+                // Önce karakteri seç
                 client.sendCharacterSelect(character)
-                Toast.makeText(this, "${character.name} seçildi", Toast.LENGTH_SHORT).show()
+                // Kısa bir bekleme
+                Thread.sleep(500)
+                // Kilitle butonuna tıkla
+                client.sendLockCommand(lockButtonPosition.x, lockButtonPosition.y)
+                Toast.makeText(this, "${character.name} seçildi ve kilitleniyor", Toast.LENGTH_SHORT).show()
             } ?: run {
                 Toast.makeText(this, "Önce PC'ye bağlanın", Toast.LENGTH_SHORT).show()
             }

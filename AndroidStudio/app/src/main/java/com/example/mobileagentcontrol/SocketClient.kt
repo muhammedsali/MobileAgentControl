@@ -2,28 +2,37 @@ package com.example.mobileagentcontrol
 
 import java.io.PrintWriter
 import java.net.Socket
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
-class SocketClient(private val ipAddress: String, private val port: Int) {
+class SocketClient(private val serverIp: String, private val serverPort: Int) {
     private var socket: Socket? = null
-    private var writer: PrintWriter? = null
+    private var outputStream: PrintWriter? = null
 
     fun connect() {
-        GlobalScope.launch(Dispatchers.IO) {
+        Thread {
             try {
-                socket = Socket(ipAddress, port)
-                writer = PrintWriter(socket!!.getOutputStream(), true)
+                socket = Socket(serverIp, serverPort)
+                outputStream = PrintWriter(socket?.getOutputStream(), true)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }
+        }.start()
     }
 
     fun sendCharacterSelect(character: Character) {
-        GlobalScope.launch(Dispatchers.IO) {
-            writer?.println("SELECT:${character.name}:${character.position.x}:${character.position.y}")
+        outputStream?.println("CLICK ${character.position.x} ${character.position.y}")
+    }
+
+    // Yeni eklenen metod
+    fun sendLockCommand(x: Int, y: Int) {
+        outputStream?.println("CLICK $x $y")
+    }
+
+    fun disconnect() {
+        try {
+            outputStream?.close()
+            socket?.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
-} 
+}
